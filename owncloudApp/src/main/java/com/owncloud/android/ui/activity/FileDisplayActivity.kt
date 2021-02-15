@@ -47,6 +47,8 @@ import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -1125,11 +1127,9 @@ class FileDisplayActivity : FileActivity(), FileFragment.ContainerActivity, OnEn
     }
 
     fun updateActionBarTitleAndHomeButton(chosenFileFromParam: OCFile?) {
-        var chosenFile = chosenFileFromParam
-        if (chosenFile == null) {
-            chosenFile = file     // if no file is passed, current file decides
-        }
-        if (chosenFile?.remotePath == OCFile.ROOT_PATH) {
+        val chosenFile = chosenFileFromParam ?: file  // if no file is passed, current file decides
+
+        if (chosenFile.remotePath == OCFile.ROOT_PATH) {
             val title =
                 when (fileListOption) {
                     FileListOption.AV_OFFLINE -> resources.getString(R.string.drawer_item_only_available_offline)
@@ -1139,11 +1139,13 @@ class FileDisplayActivity : FileActivity(), FileFragment.ContainerActivity, OnEn
             setupToolbar(ToolbarConfig.ToolbarRoot(title, true))
             listOfFilesFragment?.setSearchListener(findViewById(R.id.root_toolbar_search_view))
         } else {
-            setupToolbar(ToolbarConfig.ToolbarStandard(
-                title = chosenFile?.fileName!!,
-                displayHomeAsUpEnabled = true,
-                homeButtonEnabled = true
-            ))
+            setupToolbar(
+                ToolbarConfig.ToolbarStandard(
+                    title = chosenFile.fileName,
+                    displayHomeAsUpEnabled = true,
+                    homeButtonEnabled = true
+                )
+            )
         }
     }
 

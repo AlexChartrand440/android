@@ -26,11 +26,10 @@ package com.owncloud.android.presentation.ui.toolbar
 import android.content.Intent
 import android.view.View
 import android.view.View.VISIBLE
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
-import com.google.android.material.imageview.ShapeableImageView
-import com.google.android.material.textview.MaterialTextView
 import com.owncloud.android.R
 import com.owncloud.android.authentication.AccountUtils
 import com.owncloud.android.ui.activity.BaseActivity
@@ -75,9 +74,9 @@ abstract class ToolbarActivity : BaseActivity() {
 
         val toolbarTitle = findViewById<TextView>(R.id.root_toolbar_title)
         val searchView = findViewById<SearchView>(R.id.root_toolbar_search_view)
-        val avatarView = findViewById<ShapeableImageView>(R.id.root_toolbar_avatar)
+        val avatarView = findViewById<ImageView>(R.id.root_toolbar_avatar)
 
-        with(toolbarTitle) {
+        toolbarTitle.apply {
             isVisible = true
             text = rootToolbar.title
             if (rootToolbar.enableSearch) {
@@ -89,7 +88,7 @@ abstract class ToolbarActivity : BaseActivity() {
             }
         }
 
-        with(searchView) {
+        searchView.apply {
             isVisible = false
             setOnCloseListener {
                 searchView.visibility = View.GONE
@@ -98,18 +97,16 @@ abstract class ToolbarActivity : BaseActivity() {
             }
         }
 
-        with(avatarView) {
-            AccountUtils.getCurrentOwnCloudAccount(context) ?: return@with
+        AccountUtils.getCurrentOwnCloudAccount(baseContext) ?: return
 
-            AvatarUtils().loadAvatarForAccount(
-                avatarView,
-                AccountUtils.getCurrentOwnCloudAccount(context),
-                true,
-                context.resources.getDimension(R.dimen.toolbar_avatar_radius)
-            )
-            setOnClickListener {
-                startActivity(Intent(context, ManageAccountsActivity::class.java))
-            }
+        AvatarUtils().loadAvatarForAccount(
+            avatarView,
+            AccountUtils.getCurrentOwnCloudAccount(baseContext),
+            true,
+            baseContext.resources.getDimension(R.dimen.toolbar_avatar_radius)
+        )
+        avatarView.setOnClickListener {
+            startActivity(Intent(baseContext, ManageAccountsActivity::class.java))
         }
     }
 
