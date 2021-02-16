@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">>
+
+    <PreferenceCategory
+        app:key="security_category"
+        app:title="@string/prefs_category_security">
+
+        <CheckBoxPreference
+            app:key="set_pincode"
+            app:title="@string/prefs_passcode" />
+        <CheckBoxPreference
+            app:key="set_pattern"
+            app:title="@string/prefs_pattern" />
+        <CheckBoxPreference
+            app:key="set_biometric"
+            app:title="@string/prefs_biometric" />
+        <CheckBoxPreference
+            app:key="touches_with_other_visible_windows"
+            app:summary="@string/prefs_touches_with_other_visible_windows_summary"
+            app:title="@string/prefs_touches_with_other_visible_windows" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
