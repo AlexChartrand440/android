@@ -29,7 +29,6 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.owncloud.android.R
 import com.owncloud.android.authentication.BiometricManager
 import com.owncloud.android.data.preferences.datasources.SharedPreferencesProvider
@@ -38,6 +37,7 @@ import com.owncloud.android.extensions.showMessageInSnackbar
 import com.owncloud.android.ui.activity.BiometricActivity
 import com.owncloud.android.ui.activity.PassCodeActivity
 import com.owncloud.android.ui.activity.PatternLockActivity
+import org.koin.android.ext.android.inject
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -55,7 +55,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var passcodeSet = false
     private var mPrefTouchesWithOtherVisibleWindows: CheckBoxPreference? = null
 
-    private val mPreferencesProvider = SharedPreferencesProviderImpl(getApplicationContext())
+    private val mPreferencesProvider: SharedPreferencesProvider by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
@@ -72,7 +72,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         // Passcode lock
         mPasscode?.setOnPreferenceChangeListener { preference: Preference?, newValue: Any ->
-            val i = Intent(getApplicationContext(), PassCodeActivity::class.java)
+            val i = Intent(context, PassCodeActivity::class.java)
             val incoming = newValue as Boolean
             patternSet = mPreferencesProvider.getBoolean(
                 PatternLockActivity.PREFERENCE_SET_PATTERN,
