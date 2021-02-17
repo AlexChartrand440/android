@@ -20,18 +20,16 @@
 
 package com.owncloud.android.ui.fragment
 
-import android.app.AlertDialog
-import android.content.DialogInterface
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import com.google.android.material.snackbar.Snackbar
 import com.owncloud.android.R
 import com.owncloud.android.authentication.BiometricManager
 import com.owncloud.android.data.preferences.datasources.SharedPreferencesProvider
@@ -57,12 +55,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var passcodeSet = false
     private var mPrefTouchesWithOtherVisibleWindows: CheckBoxPreference? = null
 
-    private var mPreferencesProvider : SharedPreferencesProvider? = null
+    private val mPreferencesProvider = SharedPreferencesProviderImpl(getApplicationContext())
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
-
-        //mPreferencesProvider = SharedPreferencesProviderImpl(getApplicationContext())
 
         /*
         * Security
@@ -74,29 +70,72 @@ class SettingsFragment : PreferenceFragmentCompat() {
         mBiometric = findPreference(BiometricActivity.PREFERENCE_SET_BIOMETRIC)
         mPrefTouchesWithOtherVisibleWindows = findPreference(PREFERENCE_TOUCHES_WITH_OTHER_VISIBLE_WINDOWS)
 
-        /*
         // Passcode lock
-        mPasscode?.setOnPreferenceChangeListener(Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any ->
+        mPasscode?.setOnPreferenceChangeListener { preference: Preference?, newValue: Any ->
             val i = Intent(getApplicationContext(), PassCodeActivity::class.java)
             val incoming = newValue as Boolean
-            patternSet = (mPreferencesProvider as SharedPreferencesProviderImpl).getBoolean(PatternLockActivity.PREFERENCE_SET_PATTERN, false)
+            patternSet = mPreferencesProvider.getBoolean(
+                PatternLockActivity.PREFERENCE_SET_PATTERN,
+                false
+            )
             if (patternSet) {
-                showSnackMessage(R.string.pattern_already_set)
+                showMessageInSnackbar(getString(R.string.pattern_already_set))
             } else {
                 i.action =
                     if (incoming) PassCodeActivity.ACTION_REQUEST_WITH_RESULT else PassCodeActivity.ACTION_CHECK_WITH_RESULT
-                val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                val requestCode = if (incoming) ACTION_REQUEST_PASSCODE else ACTION_CONFIRM_PASSCODE
+                var activityLauncher: ActivityResultLauncher<Intent>? = null
+                if (requestCode == ACTION_REQUEST_PASSCODE) {
+                    activityLauncher =
+                        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                            if (result.resultCode == RESULT_OK) { // Enable passcode
 
+                                val passcode: String? = result.data?.getStringExtra(PassCodeActivity.KEY_PASSCODE)
+                                if (passcode != null && passcode.length == 4) {
+                                    for (i in 1..4) {
+                                        (mPreferencesProvider as SharedPreferencesProviderImpl).putString(
+                                            PassCodeActivity.PREFERENCE_PASSCODE_D + i,
+                                            passcode.substring(i - 1, i)
+                                        )
+                                    }
+                                    mPreferencesProvider.putBoolean(
+                                        PassCodeActivity.PREFERENCE_SET_PASSCODE,
+                                        true
+                                    )
+                                    showMessageInSnackbar(getString(R.string.pass_code_stored))
+
+                                    // Allow to use biometric lock since Passcode lock has been enabled
+                                    //enableBiometric()
+                                }
+                            }
+                        }
+                } else if (requestCode == ACTION_CONFIRM_PASSCODE) {
+                    activityLauncher =
+                        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                            if (result.resultCode == RESULT_OK) { // Disable passcode
+
+                                val keyCheck: Boolean? =
+                                    result.data?.getBooleanExtra(PassCodeActivity.KEY_CHECK_RESULT, false)
+                                if (keyCheck != null && keyCheck) {
+                                    mPreferencesProvider.putBoolean(
+                                        PassCodeActivity.PREFERENCE_SET_PASSCODE,
+                                        false
+                                    )
+                                    showMessageInSnackbar(getString(R.string.pass_code_removed))
+
+                                    // Do not allow to use biometric lock since Passcode lock has been disabled
+                                    //disableBiometric(getString(R.string.prefs_biometric_summary))
+                                }
+                            }
+                        }
                 }
-                startActivityForResult(
-                    i,
-                    if (incoming) ACTION_REQUEST_PASSCODE else ACTION_CONFIRM_PASSCODE
-                )
+
+                activityLauncher?.launch(i)
             }
             false
-        })
+        }
 
-        // Pattern lock
+        /*
 
         // Pattern lock
         if (mPattern != null) {
