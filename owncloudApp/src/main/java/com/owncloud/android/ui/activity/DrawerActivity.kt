@@ -163,7 +163,7 @@ abstract class DrawerActivity : ToolbarActivity() {
             drawer_layout.closeDrawers()
             when (menuItem.itemId) {
                 R.id.nav_settings -> {
-                    val settingsIntent = Intent(applicationContext, Preferences::class.java)
+                    val settingsIntent = Intent(applicationContext, SettingsActivity::class.java)
                     startActivity(settingsIntent)
                 }
                 R.id.drawer_menu_account_add -> createAccount(false)

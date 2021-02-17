@@ -20,14 +20,35 @@
 
 package com.owncloud.android.ui.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.owncloud.android.R
 import com.owncloud.android.ui.fragment.SettingsFragment
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings)
+
+        // Don't know if this is useful for the action bar or not
+        /*
+        delegate.installViewFactory()
+        delegate.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings)
+
+        delegate.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        delegate.supportActionBar?.setTitle(R.string.actionbar_settings)
+
+        // For adding content description tag to a title field in the action bar
+        val actionBarTitleId = resources.getIdentifier("action_bar_title", "id", "android")
+        val actionBarTitleView = window.decorView.findViewById<View>(actionBarTitleId)
+        if (actionBarTitleView != null) {    // it's null in Android 2.x
+            window.decorView.findViewById<View>(actionBarTitleId).contentDescription =
+                getString(R.string.actionbar_settings)
+        }*/
+
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.settings_container, SettingsFragment())
