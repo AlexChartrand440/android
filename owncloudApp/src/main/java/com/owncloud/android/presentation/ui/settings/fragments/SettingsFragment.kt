@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.owncloud.android.ui.fragment
+package com.owncloud.android.presentation.ui.settings.fragments
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -41,40 +41,37 @@ import org.koin.android.ext.android.inject
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    private val PREFERENCE_SECURITY_CATEGORY = "security_category"
-    val PREFERENCE_TOUCHES_WITH_OTHER_VISIBLE_WINDOWS = "touches_with_other_visible_windows"
-    private val ACTION_REQUEST_PASSCODE = 5
-    private val ACTION_CONFIRM_PASSCODE = 6
-
-    private var mPrefSecurityCategory: PreferenceCategory? = null
-    private var mPasscode: CheckBoxPreference? = null
-    private var mPattern: CheckBoxPreference? = null
-    private var mBiometric: CheckBoxPreference? = null
-    private var mBiometricManager: BiometricManager? = null
+    private var prefSecurityCategory: PreferenceCategory? = null
+    private var passcode: CheckBoxPreference? = null
+    private var pattern: CheckBoxPreference? = null
+    private var biometric: CheckBoxPreference? = null
+    private var biometricManager: BiometricManager? = null
     private var patternSet = false
     private var passcodeSet = false
-    private var mPrefTouchesWithOtherVisibleWindows: CheckBoxPreference? = null
+    private var prefTouchesWithOtherVisibleWindows: CheckBoxPreference? = null
 
-    private val mPreferencesProvider: SharedPreferencesProvider by inject()
+    private val preferencesProvider: SharedPreferencesProvider by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
-        /*
-        * Security
-        */
+        manageSecuritySettings()
 
-        mPrefSecurityCategory = findPreference(PREFERENCE_SECURITY_CATEGORY)
-        mPasscode = findPreference(PassCodeActivity.PREFERENCE_SET_PASSCODE)
-        mPattern = findPreference(PatternLockActivity.PREFERENCE_SET_PATTERN)
-        mBiometric = findPreference(BiometricActivity.PREFERENCE_SET_BIOMETRIC)
-        mPrefTouchesWithOtherVisibleWindows = findPreference(PREFERENCE_TOUCHES_WITH_OTHER_VISIBLE_WINDOWS)
+    }
+
+    fun manageSecuritySettings() {
+
+        prefSecurityCategory = findPreference(PREFERENCE_SECURITY_CATEGORY)
+        passcode = findPreference(PassCodeActivity.PREFERENCE_SET_PASSCODE)
+        pattern = findPreference(PatternLockActivity.PREFERENCE_SET_PATTERN)
+        biometric = findPreference(BiometricActivity.PREFERENCE_SET_BIOMETRIC)
+        prefTouchesWithOtherVisibleWindows = findPreference(PREFERENCE_TOUCHES_WITH_OTHER_VISIBLE_WINDOWS)
 
         // Passcode lock
-        mPasscode?.setOnPreferenceChangeListener { preference: Preference?, newValue: Any ->
+        passcode?.setOnPreferenceChangeListener { preference: Preference?, newValue: Any ->
             val i = Intent(context, PassCodeActivity::class.java)
             val incoming = newValue as Boolean
-            patternSet = mPreferencesProvider.getBoolean(
+            patternSet = preferencesProvider.getBoolean(
                 PatternLockActivity.PREFERENCE_SET_PATTERN,
                 false
             )
@@ -93,12 +90,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                                 val passcode: String? = result.data?.getStringExtra(PassCodeActivity.KEY_PASSCODE)
                                 if (passcode != null && passcode.length == 4) {
                                     for (i in 1..4) {
-                                        (mPreferencesProvider as SharedPreferencesProviderImpl).putString(
+                                        (preferencesProvider as SharedPreferencesProviderImpl).putString(
                                             PassCodeActivity.PREFERENCE_PASSCODE_D + i,
                                             passcode.substring(i - 1, i)
                                         )
                                     }
-                                    mPreferencesProvider.putBoolean(
+                                    preferencesProvider.putBoolean(
                                         PassCodeActivity.PREFERENCE_SET_PASSCODE,
                                         true
                                     )
@@ -117,7 +114,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                                 val keyCheck: Boolean? =
                                     result.data?.getBooleanExtra(PassCodeActivity.KEY_CHECK_RESULT, false)
                                 if (keyCheck != null && keyCheck) {
-                                    mPreferencesProvider.putBoolean(
+                                    preferencesProvider.putBoolean(
                                         PassCodeActivity.PREFERENCE_SET_PASSCODE,
                                         false
                                     )
@@ -215,6 +212,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
          */
+    }
+
+    companion object {
+        private const val PREFERENCE_SECURITY_CATEGORY = "security_category"
+        const val PREFERENCE_TOUCHES_WITH_OTHER_VISIBLE_WINDOWS = "touches_with_other_visible_windows"
+        private const val ACTION_REQUEST_PASSCODE = 5
+        private const val ACTION_CONFIRM_PASSCODE = 6
     }
 
 }

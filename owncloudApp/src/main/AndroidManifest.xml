@@ -72,7 +72,7 @@
         android:allowBackup="false"
         tools:targetApi="n">
         <activity
-            android:name=".ui.activity.SettingsActivity">
+            android:name=".presentation.ui.settings.SettingsActivity">
         </activity>
         <activity
             android:name=".ui.activity.SplashActivity"
